@@ -514,3 +514,235 @@ html, body {
 .custom-scroll::-webkit-scrollbar-thumb:hover {
     background: #6e4727;
 }
+
+/* ==========================================================================
+   RPG PROMOTION MODAL
+   ========================================================================== */
+.promotion-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 5, 2, 0.88); 
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.promotion-modal {
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    text-align: center;
+    background: #fdf5e6;
+    border: 3px solid #6e4727;
+    outline: 1.5px solid #d4af37;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.promotion-modal .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #3a2012 !important;
+    text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+    margin-top: 0;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    display: block;
+    width: 100%;
+}
+
+.promotion-modal p {
+    font-family: 'MedievalSharp', cursive, serif;
+    font-size: 1.05rem;
+    color: #2b1810 !important;
+    margin: 0 0 20px 0;
+    font-weight: 700;
+}
+
+.promotion-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.rpg-btn-choice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    border-radius: 8px;
+    font-family: 'Cinzel', serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.rpg-btn-choice img {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 8px;
+    object-fit: contain;
+}
+
+.rpg-btn-choice span {
+    letter-spacing: 1px;
+}
+
+.rpg-btn-choice:active {
+    transform: translateY(1px);
+}
+
+.btn-white-piece {
+    background: linear-gradient(180deg, #3a2012 0%, #211108 100%);
+    border: 2px solid #c5a059;
+    color: #f7e8c3;
+}
+
+.btn-white-piece img {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+}
+
+.btn-white-piece:hover {
+    background: linear-gradient(180deg, #5c351e 0%, #3a2012 100%);
+    border-color: #f7e8c3;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(197, 160, 89, 0.4);
+}
+
+/* Theme for Black Pieces (Light Parchment) */
+.btn-black-piece {
+    background: linear-gradient(180deg, #eaddc5 0%, #d4bf94 100%);
+    border: 2px solid #6e4727;
+    color: #2b1810;
+}
+
+.btn-black-piece img {
+    filter: drop-shadow(0 2px 4px rgba(255,255,255,0.6));
+}
+
+.btn-black-piece:hover {
+    background: linear-gradient(180deg, #f7e8c3 0%, #eaddc5 100%);
+    border-color: #3a2012;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   RPG ENDGAME MODALS (VICTORY & DRAW)
+   ========================================================================== */
+
+.rpg-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 5, 2, 0.88);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.rpg-modal {
+    width: 90%;
+    max-width: 550px;
+    padding: 40px 30px;
+    text-align: center;
+    background: #fdf5e6;
+    border: 3px solid #6e4727;
+    outline: 2px solid #d4af37;
+    border-radius: 12px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.modal-ornament {
+    font-size: 3.5rem;
+    line-height: 1;
+    margin-bottom: -10px;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+}
+
+.modal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #3a2012 !important;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.8);
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.modal-quote {
+    font-family: 'MedievalSharp', cursive, serif;
+    font-size: 1.2rem;
+    color: #5c351e !important;
+    font-style: italic;
+    line-height: 1.5;
+    margin: 10px 0 25px 0;
+    padding: 0 20px;
+    position: relative;
+}
+
+.modal-quote::before, .modal-quote::after {
+    content: "⚔";
+    display: inline-block;
+    color: #c5a059;
+    font-size: 1rem;
+    margin: 0 10px;
+    opacity: 0.7;
+}
+
+.modal-actions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.rpg-btn-large {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 32px;
+    background: linear-gradient(180deg, #3a2012 0%, #211108 100%);
+    border: 2px solid #c5a059;
+    border-radius: 8px;
+    color: #f7e8c3;
+    font-family: 'Cinzel', serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.6);
+}
+
+.rpg-btn-large:hover {
+    background: linear-gradient(180deg, #5c351e 0%, #3a2012 100%);
+    border-color: #fdf5e6;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(197, 160, 89, 0.5);
+}
+
+.rpg-btn-large:active {
+    transform: translateY(1px);
+}

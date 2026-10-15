@@ -1,87 +1,17 @@
-using Chess.Core.Enums;
 
-namespace Chess.Core.Models.Pieces;
+using BlazorChessWebApp.Core.Models.Enums;
 
-public class Bishop : Piece
+namespace BlazorChessWebApp.Core.Models.Pieces;
+
+public class Bishop : Rook
 {
     public Bishop(PieceColor color) : base(color)
     {
         Type = PieceType.Bishop;
     }
 
-    public override Piece Clone() => new Bishop(Color) { HasMoved = HasMoved };
-
-    public override List<Position> GetValidMoves(Position currentPosition, Board board)
+    public override List<Position> GetPseudoLegalMoves(Position currentPosition, Board board, Position? enPassantTarget = null)
     {
-        var validMoves = new List<Position>();
-
-        var directions = new[]
-        {
-            (-1, -1), // Up-Left
-            (-1, 1),  // Up-Right
-            (1, -1),  // Down-Left
-            (1, 1)    // Down-Right
-        };
-
-        foreach (var (rowOffset, colOffset) in directions)
-        {
-            var newRow = currentPosition.Row + rowOffset;
-            var newCol = currentPosition.Column + colOffset;
-
-            while (board.IsValidPosition(newRow, newCol))
-            {
-                var targetPiece = board.GetPieceAt(new Position(newRow, newCol));
-
-                if (targetPiece == null)
-                {
-                    validMoves.Add(new Position(newRow, newCol));
-                }
-                else
-                {
-                    if (targetPiece.Color != Color)
-                    {
-                        validMoves.Add(new Position(newRow, newCol));
-                    }
-                    break;
-                }
-
-                newRow += rowOffset;
-                newCol += colOffset;
-            }
-        }
-
-        return validMoves;
-    }
-
-    public override List<Position> GetAttackedSquares(Position currentPosition, Board board)
-    {
-        var attacked = new List<Position>();
-
-        var directions = new[]
-        {
-            (-1, -1),
-            (-1, 1),
-            (1, -1),
-            (1, 1)
-        };
-
-        foreach (var (rowOffset, colOffset) in directions)
-        {
-            var newRow = currentPosition.Row + rowOffset;
-            var newCol = currentPosition.Column + colOffset;
-
-            while (board.IsValidPosition(newRow, newCol))
-            {
-                attacked.Add(new Position(newRow, newCol));
-                if (board.GetPieceAt(new Position(newRow, newCol)) != null)
-                {
-                    break;
-                }
-                newRow += rowOffset;
-                newCol += colOffset;
-            }
-        }
-
-        return attacked;
+        return GetRayMoves(currentPosition, board, [(-1, -1), (-1, 1), (1, -1), (1, 1)]);
     }
 }

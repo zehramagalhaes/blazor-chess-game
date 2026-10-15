@@ -1,0 +1,79 @@
+using BlazorChessWebApp.Core.Models;
+using BlazorChessWebApp.Core.Models.Enums;
+using BlazorChessWebApp.Core.Models.Pieces;
+
+namespace BlazorChessWebApp.Core.Controllers;
+
+public class GameController
+{
+    private Game Game { get; set; } = new Game();
+    public Position? SelectedPosition { get; private set; }
+    public List<Position> ValidMoves { get; private set; } = new List<Position>();
+
+    // Pass-through getters for the View
+    public Board Board => Game.Board;
+    public PieceColor CurrentTurn => Game.CurrentTurn;
+    public bool IsInCheck => Game.IsInCheck;
+    public bool IsCheckmate => Game.IsCheckmate;
+    public bool IsStalemate => Game.IsStalemate;
+    public IReadOnlyList<Piece> WhiteCapturedPieces => Game.WhiteCapturedPieces;
+    public IReadOnlyList<Piece> BlackCapturedPieces => Game.BlackCapturedPieces;
+    public IReadOnlyList<MoveLogEntry> MoveHistory => Game.MoveHistory;
+
+    public void HandleSquareClick(int row, int col)
+    {
+        var clickedPos = new Position(row, col);
+        var clickedPiece = Board.GetPieceAt(clickedPos);
+
+        // 1. Execute move if target square is in valid moves
+        if (SelectedPosition != null && ValidMoves.Contains(clickedPos))
+        {
+            bool success = Game.MakeMove(SelectedPosition, clickedPos);
+            if (success)
+            {
+                ClearSelection();
+                return;
+            }
+        }
+
+        // 2. Select piece if owned by current turn player
+        if (clickedPiece != null && clickedPiece.Color == CurrentTurn)
+        {
+            SelectedPosition = clickedPos;
+            ValidMoves = Game.GetLegalMoves(clickedPos);
+        }
+        else
+        {
+            ClearSelection();
+        }
+    }
+
+    public void StartNewGame()
+    {
+        Game = new Game();
+        ClearSelection();
+    }
+
+    private void ClearSelection()
+    {
+        SelectedPosition = null;
+        ValidMoves.Clear();
+    }
+
+    public string GetPieceAssetPath(Piece piece)
+    {
+        string colorPrefix = piece.Color == PieceColor.White ? "w" : "b";
+        string typeName = piece.Type.ToString().ToLower();
+        return $"images/pieces/{colorPrefix}_{typeName}.svg";
+    }
+
+    // Maps Domain LogType to Presentation CSS Classes
+    public string GetLogCssClass(LogType type) => type switch
+    {
+        LogType.Move => "log-move",
+        LogType.Kill => "log-kill",
+        LogType.Check => "log-kill",
+        LogType.Checkmate => "log-kill",
+        _ => "log-info"
+    };
+}

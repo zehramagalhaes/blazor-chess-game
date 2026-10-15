@@ -1,0 +1,171 @@
+﻿@page "/"
+@using BlazorChessWebApp.Core.Controllers
+
+<PageTitle>Royal Chess - Medieval Realm</PageTitle>
+
+<div class="realm-app-wrapper">
+    <!-- Medieval RPG Navigation Banner -->
+    <header class="rpg-navbar">
+        <div class="navbar-brand">
+            <div class="brand-crest">
+                <span class="crest-icon">⚔️</span>
+            </div>
+            <div class="brand-details">
+                <h1 class="brand-title">ROYAL CHESS</h1>
+                <span class="brand-subtitle">MEDIEVAL REALM v10.0</span>
+            </div>
+        </div>
+
+        <div class="navbar-status">
+            <div class="turn-banner @(_controller.CurrentTurn == PieceColor.White ? "white-turn" : "black-turn")">
+                <span class="status-gem"></span>
+                <span class="turn-title">@(_controller.CurrentTurn == PieceColor.White ? "WHITE KINGDOM" : "BLACK EMPIRE")</span>
+            </div>
+
+            @if (_controller is { IsInCheck: true, IsCheckmate: false })
+            {
+                <div class="check-banner">
+                    <span class="check-icon">🔥</span>
+                    <span class="check-text">KING IN CHECK!</span>
+                </div>
+            }
+
+            @if (_controller.IsCheckmate)
+            {
+                <div class="check-banner victory-banner">
+                    <span class="check-icon">👑</span>
+                    <span class="check-text">CHECKMATE!</span>
+                </div>
+            }
+        </div>
+
+        <div class="navbar-actions">
+            <button class="rpg-btn btn-new-game" @onclick="_controller.StartNewGame">
+                <span class="btn-icon">⚔️</span>
+                <span>NEW BATTLE</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Game Realm Workspace -->
+    <main class="game-realm-workspace">
+        <!-- Classic Wooden Chessboard Frame -->
+        <div class="wooden-board-container">
+            <div class="board-frame">
+                <div class="rank-sidebar">
+                    @for (int r = 8; r >= 1; r--)
+                    {
+                        <div class="rank-cell">@r</div>
+                    }
+                </div>
+                <div class="board-grid">
+                    @for (int row = 0; row < 8; row++)
+                    {
+                        for (int col = 0; col < 8; col++)
+                        {
+                            int r = row;
+                            int c = col;
+                            var currentPos = new Position(r, c);
+                            var piece = _controller.Board.GetPieceAt(currentPos);
+
+                            bool isDark = (r + c) % 2 != 0;
+                            string squareClass = isDark ? "square dark-square" : "square light-square";
+
+                            if (_controller.SelectedPosition == currentPos)
+                                squareClass += " square-selected";
+                            if (_controller.ValidMoves.Contains(currentPos))
+                                squareClass += " square-valid";
+
+                            <div class="@squareClass" @onclick="() => _controller.HandleSquareClick(r, c)">
+                                @if (piece != null)
+                                {
+                                    <img src="@_controller.GetPieceAssetPath(piece)" 
+                                         alt="@piece.Color @piece.Type" 
+                                         class="piece-asset" />
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="file-footer">
+                @foreach (var file in new[] { "A", "B", "C", "D", "E", "F", "G", "H" })
+                {
+                    <div class="file-cell">@file</div>
+                }
+            </div>
+        </div>
+
+        <!-- RPG Parchment Sidebar Panel -->
+        <aside class="rpg-sidebar">
+            <!-- Captured Spoils -->
+            <section class="parchment-card captured-card">
+                <div class="card-header">
+                    <h3 class="card-title">Captured Spoils</h3>
+                </div>
+                <div class="captured-body">
+                    <div class="captured-group">
+                        <span class="captured-label">White:</span>
+                        <div class="captured-list">
+                            @if (_controller.WhiteCapturedPieces.Count == 0)
+                            {
+                                <span class="empty-text">—</span>
+                            }
+                            else
+                            {
+                                @foreach (var p in _controller.WhiteCapturedPieces)
+                                {
+                                    <img src="@_controller.GetPieceAssetPath(p)" class="captured-piece-asset" alt="@p.Type" />
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div class="captured-group">
+                        <span class="captured-label">Black:</span>
+                        <div class="captured-list">
+                            @if (_controller.BlackCapturedPieces.Count == 0)
+                            {
+                                <span class="empty-text">—</span>
+                            }
+                            else
+                            {
+                                @foreach (var p in _controller.BlackCapturedPieces)
+                                {
+                                    <img src="@_controller.GetPieceAssetPath(p)" class="captured-piece-asset" alt="@p.Type" />
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Battle Chronicle / Move History -->
+            <section class="parchment-card log-card">
+                <div class="card-header">
+                    <h3 class="card-title">Battle Chronicle</h3>
+                    <span class="log-counter">Turn @_controller.MoveHistory.Count</span>
+                </div>
+                <div class="log-body custom-scroll">
+                    @if (_controller.MoveHistory.Count == 0)
+                    {
+                        <div class="empty-log">The battle awaits. White Kingdom takes the first move.</div>
+                    }
+                    else
+                    {
+                        @foreach (var log in _controller.MoveHistory)
+                        {
+                            <div class="log-item @_controller.GetLogCssClass(log.Type)">
+                                <span class="log-timestamp">@log.Timestamp.ToString("HH:mm:ss")</span>
+                                <span class="log-message">@log.Message</span>
+                            </div>
+                        }
+                    }
+                </div>
+            </section>
+        </aside>
+    </main>
+</div>
+
+@code {
+    private readonly GameController _controller = new GameController();
+}

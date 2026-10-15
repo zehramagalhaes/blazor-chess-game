@@ -49,6 +49,33 @@
 
     <!-- Main Game Realm Workspace -->
     <main class="game-realm-workspace">
+        @if (_controller.IsPromoting)
+    {
+        <div class="promotion-overlay">
+            <div class="promotion-modal parchment-card">
+                <h2 class="card-title">A new noble is born!</h2>
+                <p>Choose your new noble piece:</p>
+                <div class="promotion-options">
+                    <button class="rpg-btn-choice @(_controller.CurrentTurn == PieceColor.White ? "btn-white-piece" : "btn-black-piece")" @onclick="() => _controller.PromotePawn(PieceType.Queen)">
+                        <img src="@_controller.GetPieceAssetPathByColorAndType(_controller.CurrentTurn, PieceType.Queen)" alt="Queen" />
+                        <span>QUEEN</span>
+                    </button>
+                    <button class="rpg-btn-choice @(_controller.CurrentTurn == PieceColor.White ? "btn-white-piece" : "btn-black-piece")" @onclick="() => _controller.PromotePawn(PieceType.Rook)">
+                        <img src="@_controller.GetPieceAssetPathByColorAndType(_controller.CurrentTurn, PieceType.Rook)" alt="Rook" />
+                        <span>ROOK</span>
+                    </button>
+                    <button class="rpg-btn-choice @(_controller.CurrentTurn == PieceColor.White ? "btn-white-piece" : "btn-black-piece")" @onclick="() => _controller.PromotePawn(PieceType.Bishop)">
+                        <img src="@_controller.GetPieceAssetPathByColorAndType(_controller.CurrentTurn, PieceType.Bishop)" alt="Bishop" />
+                        <span>BISHOP</span>
+                    </button>
+                    <button class="rpg-btn-choice @(_controller.CurrentTurn == PieceColor.White ? "btn-white-piece" : "btn-black-piece")" @onclick="() => _controller.PromotePawn(PieceType.Knight)">
+                        <img src="@_controller.GetPieceAssetPathByColorAndType(_controller.CurrentTurn, PieceType.Knight)" alt="Knight" />
+                        <span>KNIGHT</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
         <!-- Classic Wooden Chessboard Frame -->
         <div class="wooden-board-container">
             <div class="board-frame">

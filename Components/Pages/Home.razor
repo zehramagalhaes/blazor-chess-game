@@ -1,0 +1,97 @@
+﻿@page "/"
+@using Chess.Core.Enums
+@using Chess.Core.Models
+@rendermode InteractiveServer
+
+<PageTitle>Blazor Chess</PageTitle>
+
+<div class="chess-container">
+    <div class="game-info">
+        <h2>Turn: @(_game.CurrentTurn)</h2>
+    </div>
+
+    <div class="board">
+        @for (int row = 0; row < 8; row++)
+        {
+            for (int col = 0; col < 8; col++)
+            {
+                // Local variables are required inside loops for event handlers in Blazor
+                int r = row;
+                int c = col;
+                
+                var currentPosition = new Position(r, c);
+                var pieceOnSquare = _game.Board.GetPieceAt(currentPosition);
+                
+                bool isDarkSquare = (r + c) % 2 != 0;
+                string squareClass = isDarkSquare ? "square dark" : "square light";
+                
+                if (_selectedPosition == currentPosition)
+                    squareClass += " selected";
+                if (_validMoves.Contains(currentPosition))
+                    squareClass += " valid-move";
+
+                <div class="@squareClass" @onclick="() => HandleSquareClick(r, c)">
+                    @if (pieceOnSquare != null)
+                    {
+                        <span class="piece @(pieceOnSquare.Color == PieceColor.White ? "white-piece" : "black-piece")">
+                            @GetPieceSymbol(pieceOnSquare)
+                        </span>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private readonly Game _game = new Game();
+    private Position? _selectedPosition = null;
+    private List<Position> _validMoves = new List<Position>();
+
+    private void HandleSquareClick(int row, int col)
+    {
+        var clickedPosition = new Position(row, col);
+        var clickedPiece = _game.Board.GetPieceAt(clickedPosition);
+
+        // 1. Move the piece if a valid destination was clicked
+        if (_selectedPosition != null && _validMoves.Contains(clickedPosition))
+        {
+            _game.Board.MovePiece(_selectedPosition, clickedPosition);
+            _game.SwitchTurn();
+            ClearSelection();
+            return;
+        }
+
+        // 2. Select a piece if it belongs to the current player
+        if (clickedPiece != null && clickedPiece.Color == _game.CurrentTurn)
+        {
+            _selectedPosition = clickedPosition;
+            _validMoves = clickedPiece.GetValidMoves(clickedPosition, _game.Board);
+        }
+        // 3. Clicked empty square or enemy piece without having a piece selected
+        else
+        {
+            ClearSelection();
+        }
+    }
+
+    private void ClearSelection()
+    {
+        _selectedPosition = null;
+        _validMoves.Clear();
+    }
+
+    private string GetPieceSymbol(Piece piece)
+    {
+        return piece.Type switch
+        {
+            PieceType.King => "♚",
+            PieceType.Queen => "♛",
+            PieceType.Rook => "♜",
+            PieceType.Bishop => "♝",
+            PieceType.Knight => "♞",
+            PieceType.Pawn => "♟",
+            _ => ""
+        };
+    }
+}

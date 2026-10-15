@@ -1,0 +1,56 @@
+.chess-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: sans-serif;
+}
+
+.game-info {
+    margin-bottom: 20px;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 70px);
+    grid-template-rows: repeat(8, 70px);
+    border: 4px solid #2c3e50;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.square {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 45px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.light { background-color: #f0d9b5; }
+.dark { background-color: #b58863; }
+
+/* Interactive States */
+.selected { background-color: #7b61ff !important; }
+
+.valid-move {
+    position: relative;
+}
+
+.valid-move::after {
+    content: '';
+    width: 25px;
+    height: 25px;
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 50%;
+    position: absolute;
+}
+
+/* Piece styling */
+.piece {
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+}
+.white-piece { color: #ffffff; }
+.black-piece { color: #000000; }

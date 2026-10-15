@@ -1,41 +1,85 @@
-using Chess.Core.Enums;
-using Chess.Core.Models.Pieces;
+using BlazorChessWebApp.Core.Models.Enums;
+using BlazorChessWebApp.Core.Models.Pieces;
 
-namespace Chess.Core.Models;
+namespace BlazorChessWebApp.Core.Models;
 
 public class Board
 {
-    public Piece?[,] Squares { get; private set; } = new Piece?[8, 8];
-    public Position? EnPassantTarget { get; set; } = null;
+    private Piece?[,] Squares { get; set; } = new Piece?[8, 8];
 
-    public Board()
+    public Board(bool initialize = true)
     {
-        InitBoard();
+        if (initialize)
+        {
+            InitializeBoard();
+        }
     }
 
-    public Board(bool init)
+    public bool IsValidPosition(int row, int col)
     {
-        if (init) InitBoard();
+        return row is >= 0 and < 8 && col is >= 0 and < 8;
     }
 
-    public bool IsValidPosition(int row, int column)
+    public Piece? GetPieceAt(Position? pos)
     {
-        return row is >= 0 and < 8 && column is >= 0 and < 8;
+        if (pos == null || !IsValidPosition(pos.Row, pos.Column)) return null;
+        return Squares[pos.Row, pos.Column];
     }
 
-    public Piece? GetPieceAt(Position position)
+    public void MovePiece(Position? from, Position? to)
     {
-        return !IsValidPosition(position.Row, position.Column) ? null : Squares[position.Row, position.Column];
+        if (from == null || to == null) return;
+        Piece? piece = Squares[from.Row, from.Column];
+        Squares[to.Row, to.Column] = piece;
+        Squares[from.Row, from.Column] = null;
     }
 
-    public Position? FindKing(PieceColor color)
+    public void ReplacePiece(Position? pos, Piece? newPiece)
+    {
+        if (pos != null && IsValidPosition(pos.Row, pos.Column))
+        {
+            Squares[pos.Row, pos.Column] = newPiece;
+        }
+    }
+
+    public Board Clone()
+    {
+        var newBoard = new Board(initialize: false);
+        for (int r = 0; r < 8; r++)
+        {
+            for (int c = 0; c < 8; c++)
+            {
+                var piece = Squares[r, c];
+                if (piece != null)
+                {
+                    Piece? clonedPiece = null;
+                    
+                    if (piece is Pawn) clonedPiece = new Pawn(piece.Color);
+                    else if (piece is Queen) clonedPiece = new Queen(piece.Color);
+                    else if (piece is Bishop) clonedPiece = new Bishop(piece.Color);
+                    else if (piece is Rook) clonedPiece = new Rook(piece.Color);
+                    else if (piece is Knight) clonedPiece = new Knight(piece.Color);
+                    else if (piece is King) clonedPiece = new King(piece.Color);
+
+                    if (clonedPiece != null)
+                    {
+                        clonedPiece.HasMoved = piece.HasMoved;
+                        newBoard.Squares[r, c] = clonedPiece;
+                    }
+                }
+            }
+        }
+        return newBoard;
+    }
+
+    private Position? FindKingPosition(PieceColor color)
     {
         for (var r = 0; r < 8; r++)
         {
             for (var c = 0; c < 8; c++)
             {
                 var piece = Squares[r, c];
-                if (piece != null && piece.Type == PieceType.King && piece.Color == color)
+                if (piece is King && piece.Color == color)
                 {
                     return new Position(r, c);
                 }
@@ -44,19 +88,34 @@ public class Board
         return null;
     }
 
-    public bool IsSquareAttacked(Position position, PieceColor attackingColor)
+    public bool IsSquareAttacked(Position? target, PieceColor attackerColor)
     {
-        for (var r = 0; r < 8; r++)
+        if (target == null) return false;
+
+        for (int r = 0; r < 8; r++)
         {
-            for (var c = 0; c < 8; c++)
+            for (int c = 0; c < 8; c++)
             {
                 var piece = Squares[r, c];
-                if (piece != null && piece.Color == attackingColor)
+                if (piece != null && piece.Color == attackerColor)
                 {
-                    var attackedSquares = piece.GetAttackedSquares(new Position(r, c), this);
-                    if (attackedSquares.Contains(position))
+                    var currentPos = new Position(r, c);
+                    if (piece is Pawn)
                     {
-                        return true;
+                        int direction = piece.Color == PieceColor.White ? -1 : 1;
+                        int attackRow = r + direction;
+                        if (attackRow == target.Row && (c - 1 == target.Column || c + 1 == target.Column))
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        var moves = piece.GetPseudoLegalMoves(currentPos, this);
+                        if (moves.Contains(target))
+                        {
+                            return true;
+                        }
                     }
                 }
             }
@@ -64,219 +123,53 @@ public class Board
         return false;
     }
 
-    public bool IsInCheck(PieceColor color)
+    public bool IsKingInCheck(PieceColor kingColor)
     {
-        var kingPosition = FindKing(color);
-        if (kingPosition == null) return false;
+        Position? kingPos = FindKingPosition(kingColor);
+        if (kingPos == null) return false;
 
-        var opponentColor = color == PieceColor.White ? PieceColor.Black : PieceColor.White;
-        return IsSquareAttacked(kingPosition, opponentColor);
+        PieceColor attackerColor = kingColor == PieceColor.White ? PieceColor.Black : PieceColor.White;
+        return IsSquareAttacked(kingPos, attackerColor);
     }
 
-    public List<Position> GetLegalMoves(Position position)
+    public bool IsInsufficientMaterial()
     {
-        var piece = GetPieceAt(position);
-        if (piece == null) return new List<Position>();
-
-        var validMoves = piece.GetValidMoves(position, this);
-        var legalMoves = new List<Position>();
-
-        foreach (var move in validMoves)
+        var pieces = new List<(Piece Piece, Position Position)>();
+        for (int r = 0; r < 8; r++)
         {
-            // Castling moves are already pre-validated for checks and attacked path squares
-            if (piece.Type == PieceType.King && Math.Abs(move.Column - position.Column) == 2)
-            {
-                legalMoves.Add(move);
-                continue;
-            }
-
-            // Simulate the move and verify king is not left in check
-            var simBoard = Clone();
-            simBoard.ExecuteMove(position, move);
-
-            if (!simBoard.IsInCheck(piece.Color))
-            {
-                legalMoves.Add(move);
-            }
-        }
-
-        return legalMoves;
-    }
-
-    public bool HasAnyLegalMoves(PieceColor color)
-    {
-        for (var r = 0; r < 8; r++)
-        {
-            for (var c = 0; c < 8; c++)
-            {
-                var piece = Squares[r, c];
-                if (piece != null && piece.Color == color)
-                {
-                    var moves = GetLegalMoves(new Position(r, c));
-                    if (moves.Count > 0)
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public bool IsCheckmate(PieceColor color)
-    {
-        return IsInCheck(color) && !HasAnyLegalMoves(color);
-    }
-
-    public bool IsStalemate(PieceColor color)
-    {
-        return !IsInCheck(color) && !HasAnyLegalMoves(color);
-    }
-
-    public bool IsKingDead(PieceColor color)
-    {
-        return FindKing(color) == null;
-    }
-
-    public bool HasInsufficientMaterial()
-    {
-        var pieces = new List<Piece>();
-        for (var r = 0; r < 8; r++)
-        {
-            for (var c = 0; c < 8; c++)
+            for (int c = 0; c < 8; c++)
             {
                 var piece = Squares[r, c];
                 if (piece != null)
                 {
-                    pieces.Add(piece);
+                    pieces.Add((piece, new Position(r, c)));
                 }
             }
         }
 
-        // King vs King
-        if (pieces.Count == 2 && pieces.All(p => p.Type == PieceType.King))
-        {
-            return true;
-        }
+        if (pieces.Count == 2) return true;
 
-        // King + Minor Piece (Bishop or Knight) vs King
         if (pieces.Count == 3)
         {
-            var nonKings = pieces.Where(p => p.Type != PieceType.King).ToList();
-            if (nonKings.Count == 1 && (nonKings[0].Type == PieceType.Bishop || nonKings[0].Type == PieceType.Knight))
+            return pieces.Any(p => p.Piece is Bishop || p.Piece is Knight);
+        }
+
+        if (pieces.Count == 4)
+        {
+            var bishops = pieces.Where(p => p.Piece is Bishop).ToList();
+            if (bishops.Count == 2 && bishops[0].Piece.Color != bishops[1].Piece.Color)
             {
-                return true;
+                bool b1IsDark = (bishops[0].Position.Row + bishops[0].Position.Column) % 2 != 0;
+                bool b2IsDark = (bishops[1].Position.Row + bishops[1].Position.Column) % 2 != 0;
+                return b1IsDark == b2IsDark;
             }
         }
 
         return false;
     }
 
-    public MoveResult ExecuteMove(Position from, Position to)
+    private void InitializeBoard()
     {
-        var piece = Squares[from.Row, from.Column]!;
-        var captured = Squares[to.Row, to.Column];
-        var isEnPassant = false;
-        var isCastling = false;
-        var isPromotion = false;
-        Piece? promotedTo = null;
-
-        // 1. En Passant capture check
-        if (piece.Type == PieceType.Pawn && EnPassantTarget != null && to == EnPassantTarget)
-        {
-            var capturedPawnRow = from.Row;
-            var capturedPawnCol = to.Column;
-            captured = Squares[capturedPawnRow, capturedPawnCol];
-            Squares[capturedPawnRow, capturedPawnCol] = null;
-            isEnPassant = true;
-        }
-
-        // 2. Castling rook relocation
-        if (piece.Type == PieceType.King && Math.Abs(to.Column - from.Column) == 2)
-        {
-            isCastling = true;
-            if (to.Column == 6) // Kingside
-            {
-                var rook = Squares[from.Row, 7];
-                Squares[from.Row, 5] = rook;
-                Squares[from.Row, 7] = null;
-                if (rook != null) rook.HasMoved = true;
-            }
-            else if (to.Column == 2) // Queenside
-            {
-                var rook = Squares[from.Row, 0];
-                Squares[from.Row, 3] = rook;
-                Squares[from.Row, 0] = null;
-                if (rook != null) rook.HasMoved = true;
-            }
-        }
-
-        // 3. Update EnPassantTarget for next turn
-        if (piece.Type == PieceType.Pawn && Math.Abs(to.Row - from.Row) == 2)
-        {
-            var skippedRow = from.Row + (to.Row - from.Row) / 2;
-            EnPassantTarget = new Position(skippedRow, from.Column);
-        }
-        else
-        {
-            EnPassantTarget = null;
-        }
-
-        // 4. Place piece at destination
-        Squares[to.Row, to.Column] = piece;
-        Squares[from.Row, from.Column] = null;
-        piece.HasMoved = true;
-
-        // 5. Pawn Promotion (default to Queen)
-        if (piece.Type == PieceType.Pawn && (to.Row == 0 || to.Row == 7))
-        {
-            isPromotion = true;
-            promotedTo = new Queen(piece.Color) { HasMoved = true };
-            Squares[to.Row, to.Column] = promotedTo;
-        }
-
-        return new MoveResult
-        {
-            MovedPiece = piece,
-            From = from,
-            To = to,
-            CapturedPiece = captured,
-            IsEnPassant = isEnPassant,
-            IsCastling = isCastling,
-            IsPromotion = isPromotion,
-            PromotedTo = promotedTo
-        };
-    }
-
-    public void MovePiece(Position from, Position to)
-    {
-        ExecuteMove(from, to);
-    }
-
-    public Board Clone()
-    {
-        var clone = new Board(init: false);
-        for (var r = 0; r < 8; r++)
-        {
-            for (var c = 0; c < 8; c++)
-            {
-                var piece = Squares[r, c];
-                if (piece != null)
-                {
-                    clone.Squares[r, c] = piece.Clone();
-                }
-            }
-        }
-        clone.EnPassantTarget = EnPassantTarget;
-        return clone;
-    }
-
-    public void InitBoard()
-    {
-        Squares = new Piece?[8, 8];
-        EnPassantTarget = null;
-
-        // Black major & minor pieces
         Squares[0, 0] = new Rook(PieceColor.Black);
         Squares[0, 1] = new Knight(PieceColor.Black);
         Squares[0, 2] = new Bishop(PieceColor.Black);
@@ -286,19 +179,9 @@ public class Board
         Squares[0, 6] = new Knight(PieceColor.Black);
         Squares[0, 7] = new Rook(PieceColor.Black);
 
-        // Black pawns
-        for (var col = 0; col < 8; col++)
-        {
-            Squares[1, col] = new Pawn(PieceColor.Black);
-        }
+        for (int i = 0; i < 8; i++) Squares[1, i] = new Pawn(PieceColor.Black);
+        for (int i = 0; i < 8; i++) Squares[6, i] = new Pawn(PieceColor.White);
 
-        // White pawns
-        for (var col = 0; col < 8; col++)
-        {
-            Squares[6, col] = new Pawn(PieceColor.White);
-        }
-
-        // White major & minor pieces
         Squares[7, 0] = new Rook(PieceColor.White);
         Squares[7, 1] = new Knight(PieceColor.White);
         Squares[7, 2] = new Bishop(PieceColor.White);

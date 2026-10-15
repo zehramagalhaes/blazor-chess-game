@@ -1,4 +1,6 @@
-namespace Chess.Core.Models;
+using BlazorChessWebApp.Core.Models.Pieces;
+
+namespace BlazorChessWebApp.Core.Models;
 
 public class MoveResult
 {

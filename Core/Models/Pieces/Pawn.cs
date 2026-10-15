@@ -9,6 +9,8 @@ public class Pawn : Piece
         Type = PieceType.Pawn;
     }
 
+    public override Piece Clone() => new Pawn(Color) { HasMoved = HasMoved };
+
     public override List<Position> GetValidMoves(Position currentPosition, Board board)
     {
         var validMoves = new List<Position>();
@@ -24,8 +26,8 @@ public class Pawn : Piece
         {
             validMoves.Add(new Position(oneStepRow, col));
 
-            // 2. Two squares forward from starting rank (only if one-square step is also unblocked)
-            if (currentPosition.Row == startRow)
+            // 2. Two squares forward from starting rank
+            if (!HasMoved && currentPosition.Row == startRow)
             {
                 var twoStepRow = currentPosition.Row + 2 * forwardDirection;
                 if (board.IsValidPosition(twoStepRow, col) && board.GetPieceAt(new Position(twoStepRow, col)) == null)
@@ -35,20 +37,46 @@ public class Pawn : Piece
             }
         }
 
-        // 3. Diagonal captures
+        // 3. Diagonal captures & En Passant
         var captureCols = new[] { col - 1, col + 1 };
         foreach (var captureCol in captureCols)
         {
             var captureRow = currentPosition.Row + forwardDirection;
             if (!board.IsValidPosition(captureRow, captureCol)) continue;
 
-            var targetPiece = board.GetPieceAt(new Position(captureRow, captureCol));
+            var targetPos = new Position(captureRow, captureCol);
+            var targetPiece = board.GetPieceAt(targetPos);
+
+            // Regular capture
             if (targetPiece != null && targetPiece.Color != Color)
             {
-                validMoves.Add(new Position(captureRow, captureCol));
+                validMoves.Add(targetPos);
+            }
+            // En Passant capture
+            else if (targetPiece == null && board.EnPassantTarget != null && targetPos == board.EnPassantTarget)
+            {
+                validMoves.Add(targetPos);
             }
         }
 
         return validMoves;
+    }
+
+    public override List<Position> GetAttackedSquares(Position currentPosition, Board board)
+    {
+        var attacked = new List<Position>();
+        var forwardDirection = Color == PieceColor.White ? -1 : 1;
+        var captureCols = new[] { currentPosition.Column - 1, currentPosition.Column + 1 };
+
+        foreach (var captureCol in captureCols)
+        {
+            var captureRow = currentPosition.Row + forwardDirection;
+            if (board.IsValidPosition(captureRow, captureCol))
+            {
+                attacked.Add(new Position(captureRow, captureCol));
+            }
+        }
+
+        return attacked;
     }
 }

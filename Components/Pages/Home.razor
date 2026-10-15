@@ -1,45 +1,177 @@
-﻿@page "/"
+@page "/"
 @using Chess.Core.Enums
 @using Chess.Core.Models
 @rendermode InteractiveServer
 
-<PageTitle>Blazor Chess</PageTitle>
+<PageTitle>Chess</PageTitle>
 
-<div class="chess-container">
-    <div class="game-info">
-        <h2>Turn: @(_game.CurrentTurn)</h2>
+<div class="chess-game-container">
+    <!-- Game Control Bar -->
+    <div class="game-control-bar">
+        <div class="turn-indicator @(_game.CurrentTurn == PieceColor.White ? "white-turn" : "black-turn")">
+            <img src="@($"images/pieces/{(_game.CurrentTurn == PieceColor.White ? "w" : "b")}_king.svg")" alt="" class="turn-piece-img" />
+            <span class="turn-text">@(_game.CurrentTurn)'s Turn</span>
+        </div>
+
+        @if (_game.Board.IsInCheck(_game.CurrentTurn) && !_game.IsGameOver)
+        {
+            <div class="check-warning-badge">
+                <span>⚠️ @(_game.CurrentTurn) King is in CHECK!</span>
+            </div>
+        }
+
+        <div class="game-actions">
+            <button class="btn-action btn-new-game" @onclick="RestartGame" title="Start a new game">
+                <span>🔄</span> New Game
+            </button>
+        </div>
     </div>
 
-    <div class="board">
-        @for (int row = 0; row < 8; row++)
-        {
-            for (int col = 0; col < 8; col++)
-            {
-                // Local variables are required inside loops for event handlers in Blazor
-                int r = row;
-                int c = col;
-                
-                var currentPosition = new Position(r, c);
-                var pieceOnSquare = _game.Board.GetPieceAt(currentPosition);
-                
-                bool isDarkSquare = (r + c) % 2 != 0;
-                string squareClass = isDarkSquare ? "square dark" : "square light";
-                
-                if (_selectedPosition == currentPosition)
-                    squareClass += " selected";
-                if (_validMoves.Contains(currentPosition))
-                    squareClass += " valid-move";
+    <!-- Game Over Banner -->
+    @if (_game.IsGameOver)
+    {
+        <div class="game-over-banner">
+            <div class="game-over-content">
+                <span class="trophy-icon">🏆</span>
+                <div class="game-over-text">
+                    <span class="game-over-title">Game Over</span>
+                    <span class="game-over-reason">@(_game.GameOverReason ?? $"Winner: {_game.Winner}")</span>
+                </div>
+                <button class="btn-action btn-play-again" @onclick="RestartGame">Play Again</button>
+            </div>
+        </div>
+    }
 
-                <div class="@squareClass" @onclick="() => HandleSquareClick(r, c)">
-                    @if (pieceOnSquare != null)
+    <!-- Main Game Area -->
+    <div class="game-workspace">
+        <!-- Chess Board with Coordinates -->
+        <div class="board-container">
+            <div class="board-with-ranks">
+                <div class="rank-labels">
+                    @for (int r = 8; r >= 1; r--)
                     {
-                        <span class="piece @(pieceOnSquare.Color == PieceColor.White ? "white-piece" : "black-piece")">
-                            @GetPieceSymbol(pieceOnSquare)
-                        </span>
+                        <div class="rank-label">@r</div>
                     }
                 </div>
-            }
-        }
+
+                <div class="board-grid">
+                    @for (int row = 0; row < 8; row++)
+                    {
+                        for (int col = 0; col < 8; col++)
+                        {
+                            int r = row;
+                            int c = col;
+
+                            var currentPosition = new Position(r, c);
+                            var pieceOnSquare = _game.Board.GetPieceAt(currentPosition);
+
+                            bool isDarkSquare = (r + c) % 2 != 0;
+                            string squareClass = isDarkSquare ? "square dark" : "square light";
+
+                            if (_selectedPosition == currentPosition)
+                                squareClass += " selected";
+                            if (_validMoves.Contains(currentPosition))
+                                squareClass += " valid-move";
+
+                            if (pieceOnSquare != null && pieceOnSquare.Type == PieceType.King && pieceOnSquare.Color == _game.CurrentTurn && _game.Board.IsInCheck(_game.CurrentTurn))
+                            {
+                                squareClass += " in-check";
+                            }
+
+                            <div class="@squareClass" @onclick="() => HandleSquareClick(r, c)">
+                                @if (pieceOnSquare != null)
+                                {
+                                    <img src="@GetPieceImageSrc(pieceOnSquare)" alt="@($"{pieceOnSquare.Color} {pieceOnSquare.Type}")" class="piece-img" draggable="false" />
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="file-labels">
+                <div class="file-label-offset"></div>
+                @foreach (var file in new[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' })
+                {
+                    <div class="file-label">@file</div>
+                }
+            </div>
+        </div>
+
+        <!-- Right Side: Game Information & Logs -->
+        <div class="game-sidebar">
+            <!-- Captured Pieces -->
+            <div class="sidebar-card captured-card">
+                <div class="card-title">Captured Pieces</div>
+                <div class="captured-row">
+                    <span class="captured-label">White:</span>
+                    <div class="captured-pieces-list">
+                        @if (_game.CapturedWhitePieces.Count == 0)
+                        {
+                            <span class="none-captured">—</span>
+                        }
+                        else
+                        {
+                            @foreach (var p in _game.CapturedWhitePieces)
+                            {
+                                <img src="@GetPieceImageSrc(p)" alt="@($"{p.Color} {p.Type}")" class="captured-piece-img" draggable="false" />
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="captured-row">
+                    <span class="captured-label">Black:</span>
+                    <div class="captured-pieces-list">
+                        @if (_game.CapturedBlackPieces.Count == 0)
+                        {
+                            <span class="none-captured">—</span>
+                        }
+                        else
+                        {
+                            @foreach (var p in _game.CapturedBlackPieces)
+                            {
+                                <img src="@GetPieceImageSrc(p)" alt="@($"{p.Color} {p.Type}")" class="captured-piece-img" draggable="false" />
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Log -->
+            <div class="sidebar-card log-card">
+                <div class="card-header-row">
+                    <div class="card-title">Move Log</div>
+                    <span class="move-counter">Total Moves: @(_game.MoveCount)</span>
+                </div>
+
+                <div class="log-entries">
+                    @if (_game.Logs.Count == 0)
+                    {
+                        <div class="empty-log-state">No moves recorded yet.</div>
+                    }
+                    else
+                    {
+                        @foreach (var log in _game.Logs.AsEnumerable().Reverse())
+                        {
+                            var entryClass = log.Type switch
+                            {
+                                LogType.Move => "entry-move",
+                                LogType.Kill => "entry-kill",
+                                LogType.Check => "entry-check",
+                                LogType.Checkmate => "entry-checkmate",
+                                LogType.GameOver => "entry-gameover",
+                                _ => "entry-info"
+                            };
+
+                            <div class="log-entry @entryClass">
+                                <span class="entry-time">@log.Timestamp.ToString("HH:mm:ss")</span>
+                                <span class="entry-message">@log.Message</span>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -50,25 +182,25 @@
 
     private void HandleSquareClick(int row, int col)
     {
+        if (_game.IsGameOver) return;
+
         var clickedPosition = new Position(row, col);
         var clickedPiece = _game.Board.GetPieceAt(clickedPosition);
 
-        // 1. Move the piece if a valid destination was clicked
+        // 1. If clicking a valid destination for the selected piece, execute move
         if (_selectedPosition != null && _validMoves.Contains(clickedPosition))
         {
-            _game.Board.MovePiece(_selectedPosition, clickedPosition);
-            _game.SwitchTurn();
+            _game.MakeMove(_selectedPosition, clickedPosition);
             ClearSelection();
             return;
         }
 
-        // 2. Select a piece if it belongs to the current player
+        // 2. If clicking own piece, select it and show legal moves
         if (clickedPiece != null && clickedPiece.Color == _game.CurrentTurn)
         {
             _selectedPosition = clickedPosition;
-            _validMoves = clickedPiece.GetValidMoves(clickedPosition, _game.Board);
+            _validMoves = _game.GetLegalMoves(clickedPosition);
         }
-        // 3. Clicked empty square or enemy piece without having a piece selected
         else
         {
             ClearSelection();
@@ -81,17 +213,25 @@
         _validMoves.Clear();
     }
 
-    private string GetPieceSymbol(Piece piece)
+    private void RestartGame()
     {
-        return piece.Type switch
+        _game.RestartGame();
+        ClearSelection();
+    }
+
+    private string GetPieceImageSrc(Piece piece)
+    {
+        var prefix = piece.Color == PieceColor.White ? "w" : "b";
+        var type = piece.Type switch
         {
-            PieceType.King => "♚",
-            PieceType.Queen => "♛",
-            PieceType.Rook => "♜",
-            PieceType.Bishop => "♝",
-            PieceType.Knight => "♞",
-            PieceType.Pawn => "♟",
-            _ => ""
+            PieceType.Pawn => "pawn",
+            PieceType.Knight => "knight",
+            PieceType.Bishop => "bishop",
+            PieceType.Rook => "rook",
+            PieceType.Queen => "queen",
+            PieceType.King => "king",
+            _ => "pawn"
         };
+        return $"images/pieces/{prefix}_{type}.svg";
     }
 }

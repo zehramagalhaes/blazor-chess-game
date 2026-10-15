@@ -9,6 +9,8 @@ public class Bishop : Piece
         Type = PieceType.Bishop;
     }
 
+    public override Piece Clone() => new Bishop(Color) { HasMoved = HasMoved };
+
     public override List<Position> GetValidMoves(Position currentPosition, Board board)
     {
         var validMoves = new List<Position>();
@@ -49,5 +51,37 @@ public class Bishop : Piece
         }
 
         return validMoves;
+    }
+
+    public override List<Position> GetAttackedSquares(Position currentPosition, Board board)
+    {
+        var attacked = new List<Position>();
+
+        var directions = new[]
+        {
+            (-1, -1),
+            (-1, 1),
+            (1, -1),
+            (1, 1)
+        };
+
+        foreach (var (rowOffset, colOffset) in directions)
+        {
+            var newRow = currentPosition.Row + rowOffset;
+            var newCol = currentPosition.Column + colOffset;
+
+            while (board.IsValidPosition(newRow, newCol))
+            {
+                attacked.Add(new Position(newRow, newCol));
+                if (board.GetPieceAt(new Position(newRow, newCol)) != null)
+                {
+                    break;
+                }
+                newRow += rowOffset;
+                newCol += colOffset;
+            }
+        }
+
+        return attacked;
     }
 }

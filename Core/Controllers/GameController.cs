@@ -15,7 +15,7 @@ public class GameController
     public bool IsInCheck => Game.IsInCheck;
     public bool IsCheckmate => Game.IsCheckmate;
     public bool IsDraw => Game.IsDraw;
-    private DrawReason DrawReason => Game.DrawReason;
+    public DrawReason DrawReason => Game.DrawReason;
     private bool IsGameOver => Game.IsGameOver;
     
     public bool IsPromoting => Game.PendingPromotionPosition != null;

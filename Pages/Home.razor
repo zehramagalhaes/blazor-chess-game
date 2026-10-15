@@ -4,6 +4,65 @@
 <PageTitle>Royal Chess - Medieval Realm</PageTitle>
 
 <div class="realm-app-wrapper">
+    <!-- Checkmate modal -->
+    @if (_controller.IsCheckmate)
+    {
+        <div class="rpg-modal-overlay">
+            <div class="rpg-modal parchment-card victory-modal">
+                <div class="modal-ornament">👑</div>
+                <h2 class="modal-title">
+                    @(_controller.CurrentTurn == PieceColor.White ? "VICTORY FOR THE BLACK EMPIRE" : "VICTORY FOR THE WHITE KINGDOM")
+                </h2>
+                <p class="modal-quote">
+                    @(_controller.CurrentTurn == PieceColor.White 
+                        ? "\"The White King falls to the shadows. The Empire claims the realm!\"" 
+                        : "\"The forces of light have crushed the darkness. The Black King is captured!\"")
+                </p>
+                <div class="modal-actions">
+                    <button class="rpg-btn-large" @onclick="_controller.StartNewGame">
+                        <span class="btn-icon">⚔️</span>
+                        FORGE A NEW BATTLE
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Tie modal -->
+    @if (_controller.IsDraw)
+    {
+        <div class="rpg-modal-overlay">
+            <div class="rpg-modal parchment-card draw-modal">
+                <div class="modal-ornament">🤝</div>
+                <h2 class="modal-title">TRUCE ON THE BATTLEFIELD</h2>
+                <p class="modal-quote">
+                    @if (_controller.DrawReason == DrawReason.Stalemate)
+                    {
+                        <span>"The monarch is cornered! The armies are paralyzed in an eternal stalemate."</span>
+                    }
+                    else if (_controller.DrawReason == DrawReason.FiftyMoveRule)
+                    {
+                        <span>"Exhaustion consumes the soldiers. After 50 marches in vain, peace is sealed."</span>
+                    }
+                    else if (_controller.DrawReason == DrawReason.InsufficientMaterial)
+                    {
+                        <span>"Swords have broken and shields have fallen. No strength remains to claim victory."</span>
+                    }
+                    else
+                    {
+                        <span>"The gods have intervened. The battle ends with no victor."</span>
+                    }
+                </p>
+                <div class="modal-actions">
+                    <button class="rpg-btn-large" @onclick="_controller.StartNewGame">
+                        <span class="btn-icon">🛡️</span>
+                        SUMMON NEW ARMIES
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+    
     <!-- Medieval RPG Navigation Banner -->
     <header class="rpg-navbar">
         <div class="navbar-brand">

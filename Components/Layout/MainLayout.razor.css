@@ -1,98 +1,71 @@
-.page {
-    position: relative;
+.chess-app {
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+    background-color: #1e242b;
+    color: #e2e8f0;
 }
 
-main {
-    flex: 1;
+.chess-navbar {
+    background-color: #161a1f;
+    border-bottom: 1px solid #2d3748;
+    padding: 10px 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
-}
-
-.top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-    height: 3.5rem;
+.navbar-content {
     display: flex;
     align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
-
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
-
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-@media (max-width: 640.98px) {
-    .top-row {
-        justify-content: space-between;
-    }
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
 }
 
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
+.brand-icon {
+    font-size: 26px;
+    color: #f6ad55;
+    text-shadow: 0 0 10px rgba(246, 173, 85, 0.4);
+}
 
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
+.brand-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #f7fafc;
+}
 
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
-
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
-
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
+.chess-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 10px;
 }
 
 #blazor-error-ui {
     color-scheme: light only;
-    background: lightyellow;
+    background: #fff3cd;
+    color: #856404;
     bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
     display: none;
     left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    padding: 0.8rem 1.5rem;
     position: fixed;
     width: 100%;
     z-index: 1000;
 }
 
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
-    }
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 1rem;
+    top: 0.75rem;
+}

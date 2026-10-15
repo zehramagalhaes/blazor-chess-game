@@ -1,18 +1,17 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div class="chess-app">
+    <header class="chess-navbar">
+        <div class="navbar-content">
+            <div class="brand">
+                <span class="brand-icon">♞</span>
+                <span class="brand-name">Chess</span>
+            </div>
         </div>
+    </header>
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <main class="chess-content">
+        @Body
     </main>
 </div>
 

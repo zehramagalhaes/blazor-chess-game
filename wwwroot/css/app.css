@@ -1,0 +1,516 @@
+/* ==========================================================================
+   ROYAL CHESS - VINTAGE MEDIEVAL RPG GAME DESIGN
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=MedievalSharp&display=swap');
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow-x: hidden;
+    background: radial-gradient(circle at 50% 30%, #2c1a11 0%, #150a05 70%, #080301 100%);
+    font-family: 'Cinzel', serif;
+    color: #e8d3b0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+#blazor-error-ui {
+    background: #8b1e0f;
+    border: 2px solid #d4af37;
+    color: #f7e8c3;
+    bottom: 0;
+    display: none;
+    left: 0;
+    padding: 0.8rem 1.5rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    font-weight: 700;
+}
+
+.realm-app-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 96vw;
+    height: 94vh;
+    max-width: 1800px;
+    box-sizing: border-box;
+    gap: 16px;
+}
+
+/* ==========================================================================
+   MEDIEVAL RPG NAVBAR
+   ========================================================================== */
+.rpg-navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 28px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #3d2314 0%, #28150a 100%);
+    border: 2px solid #c5a059;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-crest {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #5c351e, #1a0b04);
+    border: 2px solid #d4af37;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.6rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.brand-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-title {
+    font-size: 1.3rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #f7e8c3;
+    margin: 0;
+    text-shadow: 2px 2px 4px #000000;
+}
+
+.brand-subtitle {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #c5a059;
+    letter-spacing: 2px;
+}
+
+.navbar-status {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.turn-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 24px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: #1c0d06;
+    border: 2px solid #8b6508;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+}
+
+.status-gem {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.white-turn {
+    border-color: #d4af37;
+    color: #fff8e7;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+.white-turn .status-gem {
+    background-color: #2ec4b6;
+    box-shadow: 0 0 8px #2ec4b6;
+}
+
+.black-turn {
+    border-color: #8b1e0f;
+    color: #e2a9a1;
+    box-shadow: 0 0 15px rgba(139, 30, 15, 0.4);
+}
+
+.black-turn .status-gem {
+    background-color: #e63946;
+    box-shadow: 0 0 8px #e63946;
+}
+
+.check-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 6px;
+    background: #5c1208;
+    border: 2px solid #e63946;
+    color: #ffccd5;
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    animation: pulse-check 1.2s infinite alternate;
+}
+
+@keyframes pulse-check {
+    from { box-shadow: 0 0 8px rgba(230, 57, 70, 0.4); }
+    to { box-shadow: 0 0 20px rgba(230, 57, 70, 0.9); }
+}
+
+.rpg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: linear-gradient(180deg, #8b1e0f 0%, #5c1208 100%);
+    color: #f7e8c3;
+    border: 2px solid #d4af37;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.rpg-btn:hover {
+    background: linear-gradient(180deg, #a82614 0%, #73170b 100%);
+    color: #ffffff;
+    border-color: #fff8e7;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.4);
+}
+
+.rpg-btn:active {
+    transform: translateY(1px);
+}
+
+/* ==========================================================================
+   CLASSIC WOODEN CHESSBOARD
+   ========================================================================== */
+.game-realm-workspace {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    gap: 28px;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+}
+
+.wooden-board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: linear-gradient(145deg, #3a2012, #211108);
+    border: 10px solid #28150a;
+    outline: 2px solid #c5a059;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+    height: 100%;
+    box-sizing: border-box;
+    container-type: inline-size;
+    aspect-ratio: 1 / 1;
+    max-height: calc(88vh - 70px);
+}
+
+.board-frame {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    width: 100%;
+    height: calc(100% - 28px);
+}
+
+.rank-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: clamp(20px, 3.5cqw, 32px);
+    justify-content: space-around;
+    align-items: center;
+    margin-right: 8px;
+    user-select: none;
+}
+
+.rank-cell {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(0.8rem, 2.8cqw, 1.1rem);
+    font-weight: 800;
+    color: #c5a059;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.file-footer {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 28px;
+    margin-top: 6px;
+    padding-left: clamp(28px, 4.5cqw, 40px);
+    box-sizing: border-box;
+    user-select: none;
+}
+
+.file-cell {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(0.8rem, 2.8cqw, 1.1rem);
+    font-weight: 800;
+    color: #c5a059;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.board-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    border: 3px solid #1a0b04;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.square {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease;
+    position: relative;
+}
+
+/* Classic Chess Board Colors (Warm Birch & Walnut) */
+.light-square { background-color: #f0d9b5; }
+.dark-square { background-color: #b58863; }
+
+.square-selected {
+    background-color: #d4af37 !important;
+    box-shadow: inset 0 0 15px #8b6508;
+}
+
+.square-valid::after {
+    content: '';
+    width: 28%;
+    height: 28%;
+    background-color: rgba(212, 175, 55, 0.85);
+    border: 2px solid #5c4308;
+    border-radius: 50%;
+    position: absolute;
+    pointer-events: none;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.8);
+}
+
+/* Clean Asset Piece Rendering */
+.piece-asset {
+    width: 86%;
+    height: 86%;
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
+    transition: transform 0.15s ease;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.45));
+}
+
+.square:hover .piece-asset {
+    transform: scale(1.1);
+}
+
+/* ==========================================================================
+   RPG PARCHMENT SIDEBAR
+   ========================================================================== */
+.rpg-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    flex: 1;
+    min-width: 340px;
+    height: 100%;
+    max-height: calc(88vh - 70px);
+}
+
+.parchment-card {
+    background: linear-gradient(135deg, #f2e3c6 0%, #e2cd9f 100%);
+    color: #2b1810;
+    font-family: 'MedievalSharp', cursive, serif;
+    border-radius: 8px;
+    border: 3px solid #6e4727;
+    outline: 1px solid #d4af37;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: #3a2012;
+    border-bottom: 2px solid #c5a059;
+    color: #f7e8c3;
+    font-family: 'Cinzel', serif;
+}
+
+.card-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #f7e8c3;
+    margin: 0;
+}
+
+.log-counter {
+    font-size: 0.8rem;
+    color: #c5a059;
+    font-weight: 700;
+}
+
+.captured-card {
+    padding: 16px 18px;
+    flex-shrink: 0;
+}
+
+.captured-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.captured-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.captured-label {
+    width: 65px;
+    font-weight: 700;
+    color: #4a2818;
+    font-size: 0.95rem;
+}
+
+.captured-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    min-height: 32px;
+}
+
+.captured-piece-asset {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+}
+
+.empty-text {
+    color: #8c6a53;
+}
+
+/* Battle Chronicle / Move History Log */
+.log-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.log-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.empty-log {
+    color: #70523a;
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
+.log-item {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.4);
+    border-left: 4px solid #8c5d3b;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.log-timestamp {
+    font-size: 0.72rem;
+    color: #614028;
+    font-weight: 700;
+}
+
+.log-message {
+    color: #2b1810;
+    font-weight: 600;
+}
+
+.log-kill {
+    border-left-color: #8b1e0f;
+    background: rgba(139, 30, 15, 0.12);
+}
+
+.log-kill .log-message {
+    color: #6e1005;
+    font-weight: 700;
+}
+
+.log-move {
+    border-left-color: #2a5a78;
+}
+
+/* Scrollbar Style */
+.custom-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #a37b58;
+    border-radius: 4px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: #6e4727;
+}

@@ -1,4 +1,4 @@
-namespace Chess.Core.Models;
+namespace BlazorChessWebApp.Core.Models;
 
 public record Position(int Row, int Column)
 {

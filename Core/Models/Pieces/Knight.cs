@@ -1,6 +1,6 @@
-using Chess.Core.Enums;
+using BlazorChessWebApp.Core.Models.Enums;
 
-namespace Chess.Core.Models.Pieces;
+namespace BlazorChessWebApp.Core.Models.Pieces;
 
 public class Knight : Piece
 {
@@ -9,48 +9,24 @@ public class Knight : Piece
         Type = PieceType.Knight;
     }
 
-    public override Piece Clone() => new Knight(Color) { HasMoved = HasMoved };
-
-    public override List<Position> GetValidMoves(Position currentPosition, Board board)
+    public override List<Position> GetPseudoLegalMoves(Position currentPosition, Board board, Position? enPassantTarget = null)
     {
-        var validMoves = new List<Position>();
-
-        var rowOffsets = new[] { -2, -2, -1, -1, 1, 1, 2, 2 };
-        var colOffsets = new[] { -1, 1, -2, 2, -2, 2, -1, 1 };
+        var moves = new List<Position>();
+        int[] dRows = [-2, -2, -1, -1, 1, 1, 2, 2];
+        int[] dCols = [-1, 1, -2, 2, -2, 2, -1, 1];
 
         for (var i = 0; i < 8; i++)
         {
-            var newRow = currentPosition.Row + rowOffsets[i];
-            var newCol = currentPosition.Column + colOffsets[i];
+            var r = currentPosition.Row + dRows[i];
+            var c = currentPosition.Column + dCols[i];
 
-            if (!board.IsValidPosition(newRow, newCol)) continue;
-            var targetPiece = board.GetPieceAt(new Position(newRow, newCol));
-
-            // Move is valid if the square is empty or has an enemy piece
+            if (!board.IsValidPosition(r, c)) continue;
+            var targetPiece = board.GetPieceAt(new Position(r, c));
             if (targetPiece == null || targetPiece.Color != Color)
             {
-                validMoves.Add(new Position(newRow, newCol));
+                moves.Add(new Position(r, c));
             }
         }
-        return validMoves;
-    }
-
-    public override List<Position> GetAttackedSquares(Position currentPosition, Board board)
-    {
-        var attacked = new List<Position>();
-        var rowOffsets = new[] { -2, -2, -1, -1, 1, 1, 2, 2 };
-        var colOffsets = new[] { -1, 1, -2, 2, -2, 2, -1, 1 };
-
-        for (var i = 0; i < 8; i++)
-        {
-            var newRow = currentPosition.Row + rowOffsets[i];
-            var newCol = currentPosition.Column + colOffsets[i];
-
-            if (board.IsValidPosition(newRow, newCol))
-            {
-                attacked.Add(new Position(newRow, newCol));
-            }
-        }
-        return attacked;
+        return moves;
     }
 }

@@ -1,6 +1,6 @@
-using Chess.Core.Enums;
+using BlazorChessWebApp.Core.Models.Enums;
 
-namespace Chess.Core.Models.Pieces;
+namespace BlazorChessWebApp.Core.Models.Pieces;
 
 public class Pawn : Piece
 {
@@ -9,74 +9,45 @@ public class Pawn : Piece
         Type = PieceType.Pawn;
     }
 
-    public override Piece Clone() => new Pawn(Color) { HasMoved = HasMoved };
-
-    public override List<Position> GetValidMoves(Position currentPosition, Board board)
+    public override List<Position> GetPseudoLegalMoves(Position currentPosition, Board board, Position? enPassantTarget = null)
     {
-        var validMoves = new List<Position>();
+        var moves = new List<Position>();
+        int direction = Color == PieceColor.White ? -1 : 1;
+        int startRow = Color == PieceColor.White ? 6 : 1;
 
-        var forwardDirection = Color == PieceColor.White ? -1 : 1;
-        var startRow = Color == PieceColor.White ? 6 : 1;
-
-        // 1. One square forward
-        var oneStepRow = currentPosition.Row + forwardDirection;
-        var col = currentPosition.Column;
-
-        if (board.IsValidPosition(oneStepRow, col) && board.GetPieceAt(new Position(oneStepRow, col)) == null)
+        int nextRow = currentPosition.Row + direction;
+        if (board.IsValidPosition(nextRow, currentPosition.Column) && board.GetPieceAt(new Position(nextRow, currentPosition.Column)) == null)
         {
-            validMoves.Add(new Position(oneStepRow, col));
+            moves.Add(new Position(nextRow, currentPosition.Column));
 
-            // 2. Two squares forward from starting rank
-            if (!HasMoved && currentPosition.Row == startRow)
+            int doubleNextRow = currentPosition.Row + (2 * direction);
+            if (currentPosition.Row == startRow && board.GetPieceAt(new Position(doubleNextRow, currentPosition.Column)) == null)
             {
-                var twoStepRow = currentPosition.Row + 2 * forwardDirection;
-                if (board.IsValidPosition(twoStepRow, col) && board.GetPieceAt(new Position(twoStepRow, col)) == null)
+                moves.Add(new Position(doubleNextRow, currentPosition.Column));
+            }
+        }
+
+        int[] captureCols = { currentPosition.Column - 1, currentPosition.Column + 1 };
+        foreach (int col in captureCols)
+        {
+            if (board.IsValidPosition(nextRow, col))
+            {
+                var targetPos = new Position(nextRow, col);
+                var targetPiece = board.GetPieceAt(targetPos);
+
+                // Standard capture
+                if (targetPiece != null && targetPiece.Color != Color)
                 {
-                    validMoves.Add(new Position(twoStepRow, col));
+                    moves.Add(targetPos);
+                }
+                // En Passant capture
+                else if (enPassantTarget != null && targetPos == enPassantTarget)
+                {
+                    moves.Add(targetPos);
                 }
             }
         }
 
-        // 3. Diagonal captures & En Passant
-        var captureCols = new[] { col - 1, col + 1 };
-        foreach (var captureCol in captureCols)
-        {
-            var captureRow = currentPosition.Row + forwardDirection;
-            if (!board.IsValidPosition(captureRow, captureCol)) continue;
-
-            var targetPos = new Position(captureRow, captureCol);
-            var targetPiece = board.GetPieceAt(targetPos);
-
-            // Regular capture
-            if (targetPiece != null && targetPiece.Color != Color)
-            {
-                validMoves.Add(targetPos);
-            }
-            // En Passant capture
-            else if (targetPiece == null && board.EnPassantTarget != null && targetPos == board.EnPassantTarget)
-            {
-                validMoves.Add(targetPos);
-            }
-        }
-
-        return validMoves;
-    }
-
-    public override List<Position> GetAttackedSquares(Position currentPosition, Board board)
-    {
-        var attacked = new List<Position>();
-        var forwardDirection = Color == PieceColor.White ? -1 : 1;
-        var captureCols = new[] { currentPosition.Column - 1, currentPosition.Column + 1 };
-
-        foreach (var captureCol in captureCols)
-        {
-            var captureRow = currentPosition.Row + forwardDirection;
-            if (board.IsValidPosition(captureRow, captureCol))
-            {
-                attacked.Add(new Position(captureRow, captureCol));
-            }
-        }
-
-        return attacked;
+        return moves;
     }
 }

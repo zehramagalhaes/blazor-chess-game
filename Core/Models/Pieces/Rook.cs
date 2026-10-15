@@ -1,6 +1,6 @@
-using Chess.Core.Enums;
+using BlazorChessWebApp.Core.Models.Enums;
 
-namespace Chess.Core.Models.Pieces;
+namespace BlazorChessWebApp.Core.Models.Pieces;
 
 public class Rook : Piece
 {
@@ -9,79 +9,41 @@ public class Rook : Piece
         Type = PieceType.Rook;
     }
 
-    public override Piece Clone() => new Rook(Color) { HasMoved = HasMoved };
-
-    public override List<Position> GetValidMoves(Position currentPosition, Board board)
+    public override List<Position> GetPseudoLegalMoves(Position currentPosition, Board board, Position? enPassantTarget = null)
     {
-        var validMoves = new List<Position>();
+        return GetRayMoves(currentPosition, board, [(-1, 0), (1, 0), (0, -1), (0, 1)]);
+    }
 
-        var directions = new[]
+    protected List<Position> GetRayMoves(Position start, Board board, (int dRow, int dCol)[] directions)
+    {
+        var moves = new List<Position>();
+        
+        foreach (var (dRow, dCol) in directions)
         {
-            (-1, 0), // Up
-            (1, 0),  // Down
-            (0, -1), // Left
-            (0, 1)   // Right
-        };
+            var r = start.Row + dRow;
+            var c = start.Column + dCol;
 
-        foreach (var (rowOffset, colOffset) in directions)
-        {
-            var newRow = currentPosition.Row + rowOffset;
-            var newCol = currentPosition.Column + colOffset;
-
-            while (board.IsValidPosition(newRow, newCol))
+            while (board.IsValidPosition(r, c))
             {
-                var targetPiece = board.GetPieceAt(new Position(newRow, newCol));
-
+                var targetPiece = board.GetPieceAt(new Position(r, c));
+                
                 if (targetPiece == null)
                 {
-                    validMoves.Add(new Position(newRow, newCol));
+                    moves.Add(new Position(r, c));
                 }
                 else
                 {
                     if (targetPiece.Color != Color)
                     {
-                        validMoves.Add(new Position(newRow, newCol));
+                        moves.Add(new Position(r, c));
                     }
-                    break;
+                    break; 
                 }
-
-                newRow += rowOffset;
-                newCol += colOffset;
+                
+                r += dRow;
+                c += dCol;
             }
         }
-
-        return validMoves;
-    }
-
-    public override List<Position> GetAttackedSquares(Position currentPosition, Board board)
-    {
-        var attacked = new List<Position>();
-
-        var directions = new[]
-        {
-            (-1, 0),
-            (1, 0),
-            (0, -1),
-            (0, 1)
-        };
-
-        foreach (var (rowOffset, colOffset) in directions)
-        {
-            var newRow = currentPosition.Row + rowOffset;
-            var newCol = currentPosition.Column + colOffset;
-
-            while (board.IsValidPosition(newRow, newCol))
-            {
-                attacked.Add(new Position(newRow, newCol));
-                if (board.GetPieceAt(new Position(newRow, newCol)) != null)
-                {
-                    break;
-                }
-                newRow += rowOffset;
-                newCol += colOffset;
-            }
-        }
-
-        return attacked;
+        return moves;
     }
 }
